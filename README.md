@@ -32,6 +32,7 @@ type Post = {
   content: string | null;
 }
 
+// schema keys should correspond to your table IDs
 export type Schema = {
   users: User;
   posts: Post;
@@ -50,10 +51,14 @@ const client = new Client()
   .setProject('YOUR_PROJECT_ID');
 
 const db = new TablesDB(client);
+
+// Provide your schema as a generic parameter
 const typed = new TypedTables<Schema>(db);
 ```
 
 **4. Use the strongly typed methods**
+
+Note that certain methods from `TablesDB` are unavailable via the typed wrapper because the wrapper does not allow mutations that deviate from the schema.
 
 ```typescript
 // Create a new user
