@@ -1,4 +1,11 @@
-import type { IndexType, RelationshipType, Models, RelationMutate, TablesDB } from 'node-appwrite';
+import {
+  type IndexType,
+  type RelationshipType,
+  type Models,
+  type RelationMutate,
+  type TablesDB,
+  Query,
+} from 'node-appwrite';
 
 type NonRecursiveTypes =
   | null
@@ -511,7 +518,10 @@ export default class TypedTables<Schema extends Record<string, object>> {
   }): Promise<RowList<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>>>> {
     return this.tablesDb.listRows<
       Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>> & SelectableRowMeta
-    >(params);
+    >({
+      ...params,
+      queries: params.select ? [Query.select(params.select), ...(params.queries ?? [])] : params.queries,
+    });
   }
 
   public async createRow<const TableId extends keyof Schema & string>(params: {
@@ -579,7 +589,10 @@ export default class TypedTables<Schema extends Record<string, object>> {
   }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>>> {
     return this.tablesDb.getRow<
       Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>> & SelectableRowMeta
-    >(params);
+    >({
+      ...params,
+      queries: params.select ? [Query.select(params.select), ...(params.queries ?? [])] : params.queries,
+    });
   }
 
   public async upsertRow<const TableId extends keyof Schema & string>(params: {
