@@ -1,6 +1,6 @@
 {
   "name": "appwrite-typed-db",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "./dist/appwrite-typed-db.umd.js",
   "module": "./dist/appwrite-typed-db.es.js",
   "types": "./dist/appwrite-typed-db.d.ts",
@@ -17,7 +17,8 @@
   "exports": {
     ".": {
       "import": "./dist/appwrite-typed-db.es.js",
-      "require": "./dist/appwrite-typed-db.umd.js"
+      "require": "./dist/appwrite-typed-db.umd.js",
+      "types": "./dist/appwrite-typed-db.d.ts"
     }
   },
   "description": "Strongly typed API for Appwrite Tables DB.",
