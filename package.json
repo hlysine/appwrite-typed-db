@@ -4,6 +4,7 @@
   "main": "./dist/appwrite-typed-db.umd.js",
   "module": "./dist/appwrite-typed-db.es.js",
   "types": "./dist/appwrite-typed-db.d.ts",
+  "license": "MIT",
   "devDependencies": {
     "@microsoft/api-extractor": "^7.52.11",
     "unplugin-dts": "^1.0.0-beta.6",
