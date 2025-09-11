@@ -41,10 +41,25 @@ export type Schema = {
 
 **3. Initialize `TypedTables` with your schema**
 
+Import on client:
+
+```typescript
+import { Client, TablesDB } from 'appwrite';
+import { TypedDB } from 'appwrite-typed-db';
+import { Schema } from './path-to-your-schema-file.ts';
+```
+
+Import on server:
+
 ```typescript
 import { Client, TablesDB } from 'node-appwrite';
-import { TypedTables } from 'appwrite-typed-db';
+import { TypedDB } from 'appwrite-typed-db/node';
 import { Schema } from './path-to-your-schema-file.ts';
+```
+
+Then initialize:
+
+```typescript
 
 const client = new Client()
   .setEndpoint('https://YOUR_APPWRITE_ENDPOINT')
@@ -53,7 +68,7 @@ const client = new Client()
 const db = new TablesDB(client);
 
 // Provide your schema as a generic parameter
-const typed = new TypedTables<Schema>(db);
+const typed = new TypedDB<Schema>(db);
 ```
 
 **4. Use the strongly typed methods**

@@ -1,6 +1,6 @@
 {
   "name": "appwrite-typed-db",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "main": "./dist/appwrite-typed-db.umd.js",
   "module": "./dist/appwrite-typed-db.es.js",
   "types": "./dist/appwrite-typed-db.d.ts",
@@ -11,14 +11,28 @@
     "vite": "^7.1.5"
   },
   "peerDependencies": {
+    "appwrite": "^20.0.0",
     "node-appwrite": "^19.0.0",
     "typescript": "^5"
   },
+  "peerDependenciesMeta": {
+    "appwrite": {
+      "optional": true
+    },
+    "node-appwrite": {
+      "optional": true
+    }
+  },
   "exports": {
     ".": {
-      "types": "./dist/appwrite-typed-db.d.ts",
-      "import": "./dist/appwrite-typed-db.es.js",
-      "require": "./dist/appwrite-typed-db.umd.js"
+      "types": "./dist/appwrite.d.ts",
+      "import": "./dist/appwrite.es.js",
+      "require": "./dist/appwrite.umd.js"
+    },
+    "./node": {
+      "types": "./dist/node-appwrite.d.ts",
+      "import": "./dist/node-appwrite.es.js",
+      "require": "./dist/node-appwrite.umd.js"
     }
   },
   "description": "Strongly typed API for Appwrite Tables DB.",
