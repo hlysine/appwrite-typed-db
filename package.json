@@ -1,6 +1,6 @@
 {
   "name": "appwrite-typed-db",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "./dist/appwrite-typed-db.umd.js",
   "module": "./dist/appwrite-typed-db.es.js",
   "types": "./dist/appwrite-typed-db.d.ts",

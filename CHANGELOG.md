@@ -1,3 +1,11 @@
+# 0.3.0
+
+- Reworked types for more concise method signatures
+- Added `getRowOptional` and `createRowOptional` methods
+- Added better defaults when no schema / selectors are provided
+- Added the populate API
+- Added unit tests
+
 # 0.2.0
 
 - Renamed default export from `TypedTables` to `TypedDB`
