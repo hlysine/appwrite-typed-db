@@ -4,7 +4,7 @@ A strongly typed API wrapper for Appwrite Tables DB.
 
 ## Usage
 
-**1. Install the package**
+### 1. Install the package
 
 ```bash
 npm install appwrite-typed-db
@@ -16,7 +16,7 @@ pnpm add appwrite-typed-db
 bun add appwrite-typed-db
 ```
 
-**2. Define your database schema**
+### 2. Define your database schema
 
 ```typescript
 type User = {
@@ -39,7 +39,7 @@ export type Schema = {
 }
 ```
 
-**3. Initialize `TypedTables` with your schema**
+### 3. Initialize `TypedTables` with your schema
 
 Import on client:
 
@@ -71,17 +71,45 @@ const db = new TablesDB(client);
 const typed = new TypedDB<Schema>(db);
 ```
 
-**4. Use the strongly typed methods**
+### 4. Use the strongly typed methods
 
 Note that certain methods from `TablesDB` are unavailable via the typed wrapper because the wrapper does not allow mutations that deviate from the schema.
 
+**Using Appwrite relationships**
+
 ```typescript
-// Create a new user
+// Retrieve a row
 const newUser = await typed.getRow({
   databaseId: 'your-database-id',
   tableId: 'users',
   rowId: 'user-id',
   select: ['name', 'age', 'isActive', 'posts.title'] // this provides editor hints and replaces Query.select()
+});
+
+console.log(newUser.name); // string
+console.log(newUser.posts[0].title); // string
+
+// @ts-expect-error - content was not selected
+console.log(newUser.posts[0].content);
+```
+
+**Using string ID columns**
+
+```typescript
+// Retrieve a row
+const newUser = await typed.getRow({
+  databaseId: 'your-database-id',
+  tableId: 'users',
+  rowId: 'user-id',
+  select: ['name', 'age', 'isActive', 'posts'] // this provides editor hints and replaces Query.select()
+});
+// populate posts
+const populatedUser = await typed.populateRow({
+  row: newUser,
+  column: 'posts',
+  databaseId,
+  tableId: 'posts',
+  select: ['title'],
 });
 
 console.log(newUser.name); // string
