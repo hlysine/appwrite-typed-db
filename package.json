@@ -1,10 +1,26 @@
 {
   "name": "appwrite-typed-db",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "main": "./dist/appwrite-typed-db.umd.js",
   "module": "./dist/appwrite-typed-db.es.js",
   "types": "./dist/appwrite-typed-db.d.ts",
+  "type": "module",
   "license": "MIT",
+  "description": "Strongly typed API for Appwrite Tables DB.",
+  "homepage": "https://github.com/hlysine/appwrite-typed-db/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hlysine/appwrite-typed-db.git"
+  },
+  "keywords": [
+    "appwrite",
+    "typescript",
+    "database",
+    "tables",
+    "typed",
+    "sdk",
+    "tablesdb"
+  ],
   "dependencies": {},
   "devDependencies": {
     "@microsoft/api-extractor": "^7.52.11",
@@ -37,7 +53,6 @@
       "require": "./dist/node-appwrite.umd.js"
     }
   },
-  "description": "Strongly typed API for Appwrite Tables DB.",
   "files": [
     "dist"
   ],
@@ -47,6 +62,5 @@
     "build": "vite build",
     "preview": "vite preview",
     "prepublishOnly": "bun run build"
-  },
-  "type": "module"
+  }
 }

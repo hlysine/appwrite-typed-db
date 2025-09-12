@@ -1,3 +1,8 @@
+# 0.3.1
+
+- Fixed code hints not showing when the `select` array is empty
+- Updated readme and package meta
+
 # 0.3.0
 
 - Reworked types for more concise method signatures
