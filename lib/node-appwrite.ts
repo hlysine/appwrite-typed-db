@@ -5,6 +5,7 @@ import {
   type RelationMutate,
   type TablesDB,
   Query,
+  AppwriteException,
 } from 'node-appwrite';
 import type {
   KeysOfType,
@@ -386,6 +387,23 @@ export class TypedDB<Schema extends Record<string, object>> {
     return this.tablesDb.createRow<Row & Select<Schema[TableId]>>(params as any);
   }
 
+  public async createRowOptional<const TableId extends keyof Schema & string>(params: {
+    databaseId: string;
+    tableId: TableId;
+    rowId: string;
+    data: Simplify<CreateRowData<Schema[TableId]>>;
+    permissions?: string[];
+  }): Promise<Select<Schema[TableId]> | null> {
+    try {
+      return await this.createRow(params);
+    } catch (error) {
+      if (error instanceof AppwriteException && error.code === 409) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
   public async createRows<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
@@ -433,6 +451,26 @@ export class TypedDB<Schema extends Record<string, object>> {
       ...params,
       queries: params.select ? [Query.select(params.select), ...(params.queries ?? [])] : params.queries,
     });
+  }
+
+  public async getRowOptional<
+    const TableId extends keyof Schema & string,
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[]
+  >(params: {
+    databaseId: string;
+    tableId: TableId;
+    rowId: string;
+    select?: RowSelectors;
+    queries?: string[];
+  }): Promise<Select<Schema[TableId], RowSelectors> | null> {
+    try {
+      return await this.getRow(params);
+    } catch (error) {
+      if (error instanceof AppwriteException && error.code === 404) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   public async upsertRow<const TableId extends keyof Schema & string>(params: {
