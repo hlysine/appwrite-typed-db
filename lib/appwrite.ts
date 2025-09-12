@@ -9,16 +9,17 @@ import type {
   KeysOfType,
   EmptyReturn,
   Row,
+  DefaultSchema,
 } from './types';
 
-export class TypedDB<Schema extends Record<string, object>> {
+export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
   public constructor(private tablesDb: TablesDB) {
     this.tablesDb = tablesDb;
   }
 
   public async listRows<
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[]
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
   >(params: {
     databaseId: string;
     tableId: TableId;
@@ -60,7 +61,7 @@ export class TypedDB<Schema extends Record<string, object>> {
 
   public async getRow<
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[]
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
   >(params: {
     databaseId: string;
     tableId: TableId;
@@ -76,7 +77,7 @@ export class TypedDB<Schema extends Record<string, object>> {
 
   public async getRowOptional<
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[]
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
   >(params: {
     databaseId: string;
     tableId: TableId;

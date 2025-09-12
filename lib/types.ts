@@ -45,6 +45,12 @@ export type RowList<Row> = {
   rows: Row[];
 };
 
+export type DefaultSchema = {
+  [table: string]: {
+    [key: string]: unknown;
+  };
+};
+
 export type NonRecursiveTypes =
   | null
   | undefined
