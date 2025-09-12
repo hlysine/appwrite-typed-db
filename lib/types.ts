@@ -1,3 +1,50 @@
+export type EmptyReturn = { message: '' };
+
+export type Row = {
+  /**
+   * Row ID.
+   */
+  $id: string;
+  /**
+   * Row automatically incrementing ID.
+   */
+  $sequence: number;
+  /**
+   * Table ID.
+   */
+  $tableId: string;
+  /**
+   * Database ID.
+   */
+  $databaseId: string;
+  /**
+   * Row creation date in ISO 8601 format.
+   */
+  $createdAt: string;
+  /**
+   * Row update date in ISO 8601 format.
+   */
+  $updatedAt: string;
+  /**
+   * Row permissions. [Learn more about permissions](https://appwrite.io/docs/permissions).
+   */
+  $permissions: string[];
+};
+
+export type RowMeta = Row;
+
+export type SelectableRowMeta = {};
+
+export type TimestampOverrides = {
+  $createdAt: string;
+  $updatedAt: string;
+};
+
+export type RowList<Row> = {
+  total: number;
+  rows: Row[];
+};
+
 export type NonRecursiveTypes =
   | null
   | undefined
@@ -63,51 +110,6 @@ export type UpdateColumnParams<
 
 export type Simplify<T> = T extends NonRecursiveTypes ? T : { [Key in keyof T]: Simplify<T[Key]> };
 
-export type Row = {
-  /**
-   * Row ID.
-   */
-  $id: string;
-  /**
-   * Row automatically incrementing ID.
-   */
-  $sequence: number;
-  /**
-   * Table ID.
-   */
-  $tableId: string;
-  /**
-   * Database ID.
-   */
-  $databaseId: string;
-  /**
-   * Row creation date in ISO 8601 format.
-   */
-  $createdAt: string;
-  /**
-   * Row update date in ISO 8601 format.
-   */
-  $updatedAt: string;
-  /**
-   * Row permissions. [Learn more about permissions](https://appwrite.io/docs/permissions).
-   */
-  $permissions: string[];
-};
-
-export type RowMeta = Omit<Row, '$sequence'>;
-
-export type TimestampOverrides = {
-  $createdAt: string;
-  $updatedAt: string;
-};
-
-export type RowList<Row> = {
-  total: number;
-  rows: Row[];
-};
-
-export type SelectableRowMeta = Pick<Row, '$sequence'>;
-
 export type Unpopulate<T> = T extends NonRecursiveTypes ? T : T extends (infer U)[] ? Unpopulate<U>[] : string;
 
 export type Selectors<Source, SourceKeys extends keyof Source = keyof Source, Recursive extends boolean = true> =
@@ -130,17 +132,17 @@ export type Selectors<Source, SourceKeys extends keyof Source = keyof Source, Re
                 : '*' | (keyof (Source[Key] & SelectableRowMeta) & string)}`
       : never);
 
-export type Select<Source, Selector extends Selectors<Source>> = Selector extends '*'
+export type SelectOne<Source, Selector extends Selectors<Source>> = Selector extends '*'
   ? { [Key in keyof Source]: Unpopulate<Source[Key]> }
   : Selector extends `${infer Key}.${infer Rest}`
   ? {
       [K in Key]: Key extends keyof Source
         ? Source[Key] extends (infer ItemType)[]
-          ? Rest extends Selectors<ItemType & SelectableRowMeta>
-            ? (RowMeta & Select<ItemType & SelectableRowMeta, Rest>)[]
+          ? Rest extends Selectors<SelectableRowMeta & ItemType>
+            ? (RowMeta & SelectOne<SelectableRowMeta & ItemType, Rest>)[]
             : `Invalid selector ${Selector} - cannot resolve ${Rest}`
-          : Rest extends Selectors<Source[Key] & SelectableRowMeta>
-          ? RowMeta & Select<Source[Key] & SelectableRowMeta, Rest>
+          : Rest extends Selectors<SelectableRowMeta & Source[Key]>
+          ? RowMeta & SelectOne<SelectableRowMeta & Source[Key], Rest>
           : `Invalid selector ${Selector} - cannot resolve ${Rest}`
         : `Invalid selector ${Selector} - ${Key} is invalid`;
     }
@@ -152,8 +154,8 @@ export type MergeSelections<
   Source,
   First extends Selectors<Source>,
   Rest extends Selectors<Source>[],
-  Left extends Select<Source, First> = Select<Source, First>,
-  Right extends SelectAll<Source, Rest> = SelectAll<Source, Rest>
+  Left extends SelectOne<Source, First> = SelectOne<Source, First>,
+  Right extends SelectArray<Source, Rest> = SelectArray<Source, Rest>
 > = keyof Left extends keyof Right
   ? {
       [Key in keyof Right]: Key extends keyof Left
@@ -166,12 +168,38 @@ export type MergeSelections<
     }
   : Left & Right;
 
-export type SelectAll<Source, SelectorArray extends Selectors<Source>[]> = SelectorArray extends [
+export type SelectArray<Source, SelectorArray extends Selectors<Source>[]> = SelectorArray extends [
   infer First extends Selectors<Source>,
   ...infer Rest extends Selectors<Source>[]
 ]
   ? MergeSelections<Source, First, Rest>
   : unknown;
+
+export type SelectPropertyDefault<Source, Recursive extends boolean = true> = Source extends NonRecursiveTypes
+  ? Source
+  : Recursive extends true
+  ? Source extends (infer U)[]
+    ? U extends NonRecursiveTypes
+      ? Source
+      : (RowMeta & SelectDefault<SelectableRowMeta & U, false>)[]
+    : RowMeta & SelectDefault<SelectableRowMeta & Source, false>
+  : Source extends (infer U)[]
+  ? U extends NonRecursiveTypes
+    ? Source
+    : never
+  : never;
+
+export type SelectDefault<Source, Recursive extends boolean = true> = {
+  [Key in keyof Source as SelectPropertyDefault<Source[Key], Recursive> extends never
+    ? never
+    : Key]: SelectPropertyDefault<Source[Key], Recursive>;
+};
+
+export type Select<Source, SelectorArray extends Selectors<Source>[] | undefined = undefined> = Simplify<
+  SelectorArray extends Selectors<Source>[]
+    ? RowMeta & SelectArray<SelectableRowMeta & Source, SelectorArray>
+    : RowMeta & SelectDefault<SelectableRowMeta & Source>
+>;
 
 export type OptionalCreateDataKey<T> = {
   [Key in keyof T]-?: T[Key] extends null ? Key : null extends T[Key] ? Key : never;

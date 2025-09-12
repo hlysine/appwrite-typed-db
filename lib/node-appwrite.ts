@@ -14,12 +14,13 @@ import type {
   Selectors,
   SelectableRowMeta,
   RowList,
-  RowMeta,
-  SelectAll,
+  Select,
   CreateRowData,
+  EmptyReturn,
+  Row,
 } from './types';
 
-export default class TypedDB<Schema extends Record<string, object>> {
+export class TypedDB<Schema extends Record<string, object>> {
   public list: TablesDB['list'];
   public create: TablesDB['create'];
   public get: TablesDB['get'];
@@ -63,8 +64,8 @@ export default class TypedDB<Schema extends Record<string, object>> {
     return this.tablesDb.updateTable(params);
   }
 
-  public async deleteTable(params: { databaseId: string; tableId: keyof Schema & string }): Promise<{}> {
-    return this.tablesDb.deleteTable(params);
+  public async deleteTable(params: { databaseId: string; tableId: keyof Schema & string }): Promise<EmptyReturn> {
+    return this.tablesDb.deleteTable(params) as Promise<EmptyReturn>;
   }
 
   public async listColumns(params: {
@@ -309,8 +310,8 @@ export default class TypedDB<Schema extends Record<string, object>> {
     databaseId: string;
     tableId: TableId;
     key: keyof Schema[TableId] & string;
-  }): Promise<{}> {
-    return this.tablesDb.getColumn(params);
+  }): Promise<EmptyReturn> {
+    return this.tablesDb.getColumn(params) as Promise<EmptyReturn>;
   }
 
   public async updateRelationshipColumn<const TableId extends keyof Schema & string>(
@@ -352,8 +353,12 @@ export default class TypedDB<Schema extends Record<string, object>> {
     return this.tablesDb.getIndex(params);
   }
 
-  public async deleteIndex(params: { databaseId: string; tableId: keyof Schema & string; key: string }): Promise<{}> {
-    return this.tablesDb.deleteIndex(params);
+  public async deleteIndex(params: {
+    databaseId: string;
+    tableId: keyof Schema & string;
+    key: string;
+  }): Promise<EmptyReturn> {
+    return this.tablesDb.deleteIndex(params) as Promise<EmptyReturn>;
   }
 
   public async listRows<
@@ -364,10 +369,8 @@ export default class TypedDB<Schema extends Record<string, object>> {
     tableId: TableId;
     select?: RowSelectors;
     queries?: string[];
-  }): Promise<RowList<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>>>> {
-    return this.tablesDb.listRows<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>> & SelectableRowMeta
-    >({
+  }): Promise<RowList<Select<Schema[TableId], RowSelectors>>> {
+    return this.tablesDb.listRows<Row & Select<Schema[TableId], RowSelectors>>({
       ...params,
       queries: params.select ? [Query.select(params.select), ...(params.queries ?? [])] : params.queries,
     });
@@ -379,51 +382,41 @@ export default class TypedDB<Schema extends Record<string, object>> {
     rowId: string;
     data: Simplify<CreateRowData<Schema[TableId]>>;
     permissions?: string[];
-  }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>> {
-    return this.tablesDb.createRow<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<Select<Schema[TableId]>> {
+    return this.tablesDb.createRow<Row & Select<Schema[TableId]>>(params as any);
   }
 
   public async createRows<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
     rows: Simplify<CreateRowData<Schema[TableId]> & { $id?: string }>[];
-  }): Promise<RowList<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>>> {
-    return this.tablesDb.createRows<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<RowList<Select<Schema[TableId]>>> {
+    return this.tablesDb.createRows<Row & Select<Schema[TableId]>>(params);
   }
 
   public async upsertRows<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
     rows: Simplify<CreateRowData<Schema[TableId]> & { $id: string }>[];
-  }): Promise<RowList<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>>> {
-    return this.tablesDb.upsertRows<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<RowList<Select<Schema[TableId]>>> {
+    return this.tablesDb.upsertRows<Row & Select<Schema[TableId]>>(params);
   }
 
   public async updateRows<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
-    data: Simplify<CreateRowData<Schema[TableId]>>[];
+    data: Simplify<Partial<CreateRowData<Schema[TableId]>>>[];
     queries?: string[];
-  }): Promise<RowList<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>>> {
-    return this.tablesDb.updateRows<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<RowList<Select<Schema[TableId]>>> {
+    return this.tablesDb.updateRows<Row & Select<Schema[TableId]>>(params);
   }
 
   public async deleteRows<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
     queries?: string[];
-  }): Promise<RowList<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>>> {
-    return this.tablesDb.deleteRows<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<RowList<Select<Schema[TableId]>>> {
+    return this.tablesDb.deleteRows<Row & Select<Schema[TableId]>>(params);
   }
 
   public async getRow<
@@ -435,10 +428,8 @@ export default class TypedDB<Schema extends Record<string, object>> {
     rowId: string;
     select?: RowSelectors;
     queries?: string[];
-  }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>>> {
-    return this.tablesDb.getRow<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, RowSelectors>> & SelectableRowMeta
-    >({
+  }): Promise<Select<Schema[TableId], RowSelectors>> {
+    return this.tablesDb.getRow<Select<Schema[TableId], RowSelectors> & Row>({
       ...params,
       queries: params.select ? [Query.select(params.select), ...(params.queries ?? [])] : params.queries,
     });
@@ -450,30 +441,26 @@ export default class TypedDB<Schema extends Record<string, object>> {
     rowId: string;
     data?: Simplify<CreateRowData<Schema[TableId]> & { $id: string }>[];
     permissions?: string[];
-  }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>> {
-    return this.tablesDb.upsertRow<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<Select<Schema[TableId]>> {
+    return this.tablesDb.upsertRow<Row & Select<Schema[TableId]>>(params as any);
   }
 
   public async updateRow<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
     rowId: string;
-    data: Simplify<CreateRowData<Schema[TableId]>>[];
+    data: Simplify<Partial<CreateRowData<Schema[TableId]>>>;
     permissions?: string[];
-  }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>> {
-    return this.tablesDb.updateRow<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<Select<Schema[TableId]>> {
+    return this.tablesDb.updateRow<Row & Select<Schema[TableId]>>(params as any);
   }
 
   public async deleteRow<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
     rowId: string;
-  }): Promise<{}> {
-    return this.tablesDb.deleteRow(params);
+  }): Promise<EmptyReturn> {
+    return this.tablesDb.deleteRow(params) as Promise<EmptyReturn>;
   }
 
   public async decrementRowColumn<const TableId extends keyof Schema & string>(params: {
@@ -483,10 +470,8 @@ export default class TypedDB<Schema extends Record<string, object>> {
     column: KeysOfType<Schema[TableId], number> & string;
     value?: number;
     min?: number;
-  }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>> {
-    return this.tablesDb.decrementRowColumn<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<Select<Schema[TableId]>> {
+    return this.tablesDb.decrementRowColumn<Row & Select<Schema[TableId]>>(params);
   }
 
   public async incrementRowColumn<const TableId extends keyof Schema & string>(params: {
@@ -496,9 +481,7 @@ export default class TypedDB<Schema extends Record<string, object>> {
     column: KeysOfType<Schema[TableId], number> & string;
     value?: number;
     max?: number;
-  }): Promise<Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>>> {
-    return this.tablesDb.incrementRowColumn<
-      Simplify<RowMeta & SelectAll<Schema[TableId] & SelectableRowMeta, []>> & SelectableRowMeta
-    >(params);
+  }): Promise<Select<Schema[TableId]>> {
+    return this.tablesDb.incrementRowColumn<Row & Select<Schema[TableId]>>(params);
   }
 }

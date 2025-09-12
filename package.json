@@ -5,8 +5,10 @@
   "module": "./dist/appwrite-typed-db.es.js",
   "types": "./dist/appwrite-typed-db.d.ts",
   "license": "MIT",
+  "dependencies": {},
   "devDependencies": {
     "@microsoft/api-extractor": "^7.52.11",
+    "@types/bun": "^1.2.21",
     "unplugin-dts": "^1.0.0-beta.6",
     "vite": "^7.1.5"
   },
@@ -41,6 +43,7 @@
   ],
   "scripts": {
     "dev": "vite",
+    "test": "bun test",
     "build": "vite build",
     "preview": "vite preview",
     "prepublishOnly": "bun run build"
