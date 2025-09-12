@@ -10,6 +10,7 @@ import type {
   EmptyReturn,
   Row,
   DefaultSchema,
+  Populate,
 } from './types';
 
 export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
@@ -143,5 +144,110 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     max?: number;
   }): Promise<Select<Schema[TableId]>> {
     return this.tablesDb.incrementRowColumn<Row & Select<Schema[TableId]>>(params);
+  }
+
+  public async populateRow<
+    const Source extends object,
+    const Column extends keyof Source & string,
+    const TableId extends keyof Schema & string,
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+  >({
+    row,
+    column,
+    databaseId,
+    tableId,
+    select,
+    defaultValue = null,
+  }: {
+    row: Source;
+    column: Column;
+    databaseId: string;
+    tableId: TableId;
+    select?: RowSelectors;
+    defaultValue?: Select<Schema[TableId], RowSelectors> | null;
+  }): Promise<Populate<Source, Column, Select<Schema[TableId], RowSelectors>>> {
+    const populated = row as Populate<Source, Column, Select<Schema[TableId], RowSelectors>>;
+    const value = row[column];
+    if (!value) {
+      return populated;
+    }
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return populated;
+      }
+      const results = await this.listRows({
+        databaseId,
+        tableId,
+        select,
+        queries: [Query.equal('$id', value), Query.limit(Math.max(1000, value.length))],
+      });
+      populated[column] = value.map(id => results.rows.find(row => row.$id === id) ?? defaultValue) as any;
+    } else {
+      const result = await this.getRowOptional({
+        databaseId,
+        tableId,
+        rowId: value as string,
+        select,
+      });
+      if (result) {
+        populated[column] = result as any;
+      } else {
+        populated[column] = defaultValue as any;
+      }
+    }
+    return populated;
+  }
+
+  public async populateRows<
+    const Source extends object,
+    const Column extends keyof Source & string,
+    const TableId extends keyof Schema & string,
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+  >({
+    rows,
+    column,
+    databaseId,
+    tableId,
+    select,
+    defaultValue = null,
+  }: {
+    rows: Source[];
+    column: Column;
+    databaseId: string;
+    tableId: TableId;
+    select?: RowSelectors;
+    defaultValue?: Select<Schema[TableId], RowSelectors> | null;
+  }): Promise<Populate<Source, Column, Select<Schema[TableId], RowSelectors>>[]> {
+    if (rows.length === 0) {
+      return rows as [];
+    }
+    const populated = rows as Populate<Source, Column, Select<Schema[TableId], RowSelectors>>[];
+    const values = rows.flatMap(model => {
+      if (model[column] === null) {
+        return [];
+      } else if (Array.isArray(model[column])) {
+        return model[column] as string[];
+      } else {
+        return [model[column] as string];
+      }
+    });
+    const results = await this.listRows({
+      databaseId,
+      tableId,
+      select,
+      queries: [Query.equal('$id', values), Query.limit(Math.max(1000, values.length))],
+    });
+    populated.forEach(model => {
+      const value = model[column];
+      if (!value) {
+        return;
+      }
+      if (Array.isArray(value)) {
+        model[column] = value.map(id => results.rows.find(row => row.$id === id) ?? defaultValue) as any;
+      } else {
+        model[column] = (results.rows.find(row => row.$id === (value as string)) ?? defaultValue) as any;
+      }
+    });
+    return populated;
   }
 }

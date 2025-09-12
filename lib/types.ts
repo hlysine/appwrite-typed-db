@@ -224,3 +224,15 @@ export type CreateRowData<
   },
   OptionalKeys extends OptionalCreateDataKey<Source> = OptionalCreateDataKey<Source>
 > = Omit<MappedSource, OptionalKeys> & Partial<Pick<MappedSource, OptionalKeys>> & Partial<TimestampOverrides>;
+
+export type PopulateOne<T, Data> = T extends string
+  ? Data
+  : T extends (infer U)[]
+  ? U extends string
+    ? Data[]
+    : T
+  : T;
+
+export type Populate<Source, Key extends keyof Source & string, Data> = Simplify<{
+  [K in keyof Source]: K extends Key ? PopulateOne<Source[K], Data> : Source[K];
+}>;
