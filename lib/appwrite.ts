@@ -11,6 +11,7 @@ import type {
   Row,
   DefaultSchema,
   Populate,
+  SelectAll,
 } from './types';
 
 export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
@@ -20,7 +21,7 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
 
   public async listRows<
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] | undefined
   >(params: {
     databaseId: string;
     tableId: TableId;
@@ -39,8 +40,8 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     rowId: string;
     data: Simplify<CreateRowData<Schema[TableId]>>;
     permissions?: string[];
-  }): Promise<Select<Schema[TableId]>> {
-    return this.tablesDb.createRow<Row & Select<Schema[TableId]>>(params as any);
+  }): Promise<SelectAll<Schema[TableId]>> {
+    return this.tablesDb.createRow<Row & SelectAll<Schema[TableId]>>(params as any);
   }
 
   /**
@@ -59,7 +60,7 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     rowId: string;
     data: Simplify<CreateRowData<Schema[TableId]>>;
     permissions?: string[];
-  }): Promise<Select<Schema[TableId]> | null> {
+  }): Promise<SelectAll<Schema[TableId]> | null> {
     try {
       return await this.createRow(params);
     } catch (error) {
@@ -72,7 +73,7 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
 
   public async getRow<
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] | undefined
   >(params: {
     databaseId: string;
     tableId: TableId;
@@ -97,7 +98,7 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
    */
   public async getRowOptional<
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] | undefined
   >(params: {
     databaseId: string;
     tableId: TableId;
@@ -121,8 +122,8 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     rowId: string;
     data?: Simplify<CreateRowData<Schema[TableId]> & { $id: string }>[];
     permissions?: string[];
-  }): Promise<Select<Schema[TableId]>> {
-    return this.tablesDb.upsertRow<Row & Select<Schema[TableId]>>(params as any);
+  }): Promise<SelectAll<Schema[TableId]>> {
+    return this.tablesDb.upsertRow<Row & SelectAll<Schema[TableId]>>(params as any);
   }
 
   public async updateRow<const TableId extends keyof Schema & string>(params: {
@@ -131,8 +132,8 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     rowId: string;
     data: Simplify<Partial<CreateRowData<Schema[TableId]>>>;
     permissions?: string[];
-  }): Promise<Select<Schema[TableId]>> {
-    return this.tablesDb.updateRow<Row & Select<Schema[TableId]>>(params as any);
+  }): Promise<SelectAll<Schema[TableId]>> {
+    return this.tablesDb.updateRow<Row & SelectAll<Schema[TableId]>>(params as any);
   }
 
   public async deleteRow<const TableId extends keyof Schema & string>(params: {
@@ -150,8 +151,8 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     column: KeysOfType<Schema[TableId], number> & string;
     value?: number;
     min?: number;
-  }): Promise<Select<Schema[TableId]>> {
-    return this.tablesDb.decrementRowColumn<Row & Select<Schema[TableId]>>(params);
+  }): Promise<SelectAll<Schema[TableId]>> {
+    return this.tablesDb.decrementRowColumn<Row & SelectAll<Schema[TableId]>>(params);
   }
 
   public async incrementRowColumn<const TableId extends keyof Schema & string>(params: {
@@ -161,8 +162,8 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     column: KeysOfType<Schema[TableId], number> & string;
     value?: number;
     max?: number;
-  }): Promise<Select<Schema[TableId]>> {
-    return this.tablesDb.incrementRowColumn<Row & Select<Schema[TableId]>>(params);
+  }): Promise<SelectAll<Schema[TableId]>> {
+    return this.tablesDb.incrementRowColumn<Row & SelectAll<Schema[TableId]>>(params);
   }
 
   /**
@@ -181,7 +182,7 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     const Source extends object,
     const Column extends keyof Source & string,
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] | undefined
   >({
     row,
     column,
@@ -245,7 +246,7 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     const Source extends object,
     const Column extends keyof Source & string,
     const TableId extends keyof Schema & string,
-    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
+    const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] | undefined
   >({
     rows,
     column,

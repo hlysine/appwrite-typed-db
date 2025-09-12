@@ -138,7 +138,7 @@ export type Selectors<Source, SourceKeys extends keyof Source = keyof Source, Re
                 : '*' | (keyof (Source[Key] & SelectableRowMeta) & string)}`
       : never);
 
-export type SelectOne<Source, Selector extends Selectors<Source>> = Selector extends '*'
+type SelectOne<Source, Selector extends Selectors<Source>> = Selector extends '*'
   ? { [Key in keyof Source]: Unpopulate<Source[Key]> }
   : Selector extends `${infer Key}.${infer Rest}`
   ? {
@@ -156,7 +156,7 @@ export type SelectOne<Source, Selector extends Selectors<Source>> = Selector ext
   ? { [K in Selector]: Unpopulate<Source[K]> }
   : `Invalid selector ${Selector}`;
 
-export type MergeSelections<
+type MergeSelections<
   Source,
   First extends Selectors<Source>,
   Rest extends Selectors<Source>[],
@@ -174,14 +174,14 @@ export type MergeSelections<
     }
   : Left & Right;
 
-export type SelectArray<Source, SelectorArray extends Selectors<Source>[]> = SelectorArray extends [
+type SelectArray<Source, SelectorArray extends Selectors<Source>[]> = SelectorArray extends [
   infer First extends Selectors<Source>,
   ...infer Rest extends Selectors<Source>[]
 ]
   ? MergeSelections<Source, First, Rest>
   : unknown;
 
-export type SelectPropertyDefault<Source, Recursive extends boolean = true> = Source extends NonRecursiveTypes
+type SelectPropertyDefault<Source, Recursive extends boolean = true> = Source extends NonRecursiveTypes
   ? Source
   : Recursive extends true
   ? Source extends (infer U)[]
@@ -195,17 +195,21 @@ export type SelectPropertyDefault<Source, Recursive extends boolean = true> = So
     : never
   : never;
 
-export type SelectDefault<Source, Recursive extends boolean = true> = {
+type SelectDefault<Source, Recursive extends boolean = true> = {
   [Key in keyof Source as SelectPropertyDefault<Source[Key], Recursive> extends never
     ? never
     : Key]: SelectPropertyDefault<Source[Key], Recursive>;
 };
 
-export type Select<Source, SelectorArray extends Selectors<Source>[] | undefined = undefined> = Simplify<
-  SelectorArray extends Selectors<Source>[]
+export type Select<Source, SelectorArray extends Selectors<Source>[] | undefined> = Simplify<
+  undefined extends SelectorArray
+    ? RowMeta & SelectArray<SelectableRowMeta & Source, ['*']>
+    : SelectorArray extends Selectors<Source>[]
     ? RowMeta & SelectArray<SelectableRowMeta & Source, SelectorArray>
-    : RowMeta & SelectDefault<SelectableRowMeta & Source>
+    : never
 >;
+
+export type SelectAll<Source> = Simplify<RowMeta & SelectDefault<SelectableRowMeta & Source>>;
 
 export type OptionalCreateDataKey<T> = {
   [Key in keyof T]-?: T[Key] extends null ? Key : null extends T[Key] ? Key : never;

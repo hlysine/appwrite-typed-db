@@ -44,7 +44,6 @@ type Schema = {
   posts: Post;
 };
 
-// Provide your schema as a generic parameter
 const typed = new TypedDB<Schema>(db);
 
 test('Appwrite APIs', async () => {
