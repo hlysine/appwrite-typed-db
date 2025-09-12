@@ -389,6 +389,16 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     return this.tablesDb.createRow<Row & Select<Schema[TableId]>>(params as any);
   }
 
+  /**
+   * Create a new Row, or return null if it already exists. Before using this route, you should create a new table resource using either a [server integration](https://appwrite.io/docs/server/tablesdb#tablesDBCreateTable) API or directly from your database console.
+   *
+   * @param params.databaseId - Database ID.
+   * @param params.tableId - Table ID. You can create a new table using the Database service [server integration](https://appwrite.io/docs/server/tablesdb#tablesDBCreate). Make sure to define columns before creating rows.
+   * @param params.rowId - Row ID. Choose a custom ID or generate a random ID with `ID.unique()`. Valid chars are a-z, A-Z, 0-9, period, hyphen, and underscore. Can't start with a special char. Max length is 36 chars.
+   * @param params.data - Row data as JSON object.
+   * @param params.permissions - An array of permissions strings. By default, only the current user is granted all permissions. [Learn more about permissions](https://appwrite.io/docs/permissions).
+   * @throws {AppwriteException}
+   */
   public async createRowOptional<const TableId extends keyof Schema & string>(params: {
     databaseId: string;
     tableId: TableId;
@@ -455,6 +465,15 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     });
   }
 
+  /**
+   * Get a row by its unique ID, or return null if not found. This endpoint response returns a JSON object with the row data.
+   *
+   * @param params.databaseId - Database ID.
+   * @param params.tableId - Table ID. You can create a new table using the Database service [server integration](https://appwrite.io/docs/server/tablesdb#tablesDBCreate).
+   * @param params.rowId - Row ID.
+   * @param params.queries - Array of query strings generated using the Query class provided by the SDK. [Learn more about queries](https://appwrite.io/docs/queries). Maximum of 100 queries are allowed, each 4096 characters long.
+   * @throws {AppwriteException}
+   */
   public async getRowOptional<
     const TableId extends keyof Schema & string,
     const RowSelectors extends Selectors<Schema[TableId] & SelectableRowMeta>[] = ['*']
@@ -525,6 +544,18 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     return this.tablesDb.incrementRowColumn<Row & Select<Schema[TableId]>>(params);
   }
 
+  /**
+   * Populate a string or string array column with the referenced row(s) from another table. This is a helper method that fetches the referenced rows and replaces the IDs in the original row with the full row objects.
+   *
+   * @param param0.row - The source row containing the reference column.
+   * @param param0.column - The column in the source row that contains the reference ID(s).
+   * @param param0.databaseId - The ID of the database containing the referenced table.
+   * @param param0.tableId - The ID of the table containing the referenced rows.
+   * @param param0.select - Optional selectors to specify which fields to retrieve from the referenced rows.
+   * @param param0.defaultValue - The value to use if a referenced row is not found. Defaults to null.
+   * @returns A promise that resolves to the source row with the reference column populated with full row objects.
+   * @throws {AppwriteException} If there is an error fetching the referenced rows.
+   */
   public async populateRow<
     const Source extends object,
     const Column extends keyof Source & string,
@@ -577,6 +608,18 @@ export class TypedDB<Schema extends DefaultSchema = DefaultSchema> {
     return populated;
   }
 
+  /**
+   * Populate a string or string array column with the referenced row(s) from another table. This is a helper method that fetches the referenced rows and replaces the IDs in the original rows with the full row objects.
+   *
+   * @param param0.rows - The source rows containing the reference column.
+   * @param param0.column - The column in the source rows that contains the reference ID(s).
+   * @param param0.databaseId - The ID of the database containing the referenced table.
+   * @param param0.tableId - The ID of the table containing the referenced rows.
+   * @param param0.select - Optional selectors to specify which fields to retrieve from the referenced rows.
+   * @param param0.defaultValue - The value to use if a referenced row is not found. Defaults to null.
+   * @returns A promise that resolves to the source rows with the reference column populated with full row objects.
+   * @throws {AppwriteException} If there is an error fetching the referenced rows.
+   */
   public async populateRows<
     const Source extends object,
     const Column extends keyof Source & string,
